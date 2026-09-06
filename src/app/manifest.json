@@ -1,0 +1,9 @@
+{
+  "name": "SevaSetu — Kumbh 2027 Volunteer",
+  "short_name": "SevaSetu",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf6ec",
+  "theme_color": "#b7410e",
+  "icons": []
+}

@@ -1,0 +1,7 @@
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  // Media uploads are routed through route handlers; body limits handled per-route.
+};
+
+export default nextConfig;

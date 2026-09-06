@@ -1,0 +1,13 @@
+{
+  "version": "3",
+  "packages": ["src/lib/ai.ts", "src/lib/repository.ts", "src/lib/score-engine.ts", "src/lib/api-utils.ts"],
+  "sarvam": {
+    "stt": { "model": "saaras:v3", "endpoint": "/speech-to-text", "batch": "/speech-to-text/batch" },
+    "chat": { "model": "sarvam-105b", "endpoint": "/v2/chat/completions", "openai_compatible": true }
+  },
+  "gemini": {
+    "extraction": "sarvam-105b"
+    "embedding": "local-hash (swap-in point for a vector model)"
+  },
+  "mock_mode_env": "MOCK_AI"
+}

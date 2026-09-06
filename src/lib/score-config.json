@@ -1,0 +1,38 @@
+{
+  "base_points_per_session": 10,
+  "category_multipliers": {
+    "safety": 1.5,
+    "medical": 1.5,
+    "language": 2.0,
+    "crowd": 1.2,
+    "logistics": 1.0,
+    "technical": 1.2,
+    "teaching": 1.0,
+    "other": 1.0
+  },
+  "scarce_skill_multipliers": {
+    "lifeguard": 1.5,
+    "swimming": 1.5,
+    "first aid": 1.5,
+    "sign language": 2.0
+  },
+  "certification_bonus": {
+    "points_per_cert": 5,
+    "max_per_category": 15
+  },
+  "consistency_bonus": {
+    "min_sessions": 3,
+    "points": 5
+  },
+  "inactivity_decay": {
+    "days_threshold": 90,
+    "decay_percent_per_90d": 5,
+    "floor": 0
+  },
+  "language_proficiency_bonus": {
+    "basic": 0,
+    "conversational": 1,
+    "fluent": 2,
+    "native": 3
+  }
+}

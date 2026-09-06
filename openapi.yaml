@@ -1,0 +1,267 @@
+openapi: 3.1.0
+info:
+  title: SevaSetu Volunteer Repository API
+  version: 1.0.0
+  description: |
+    The "UPI for volunteering" — a neutral volunteer identity repository for Nashik Kumbh Mela 2027.
+    Volunteers onboard once (skills, languages, availability, verification, Seva Score); partner apps
+    (dispatch, crowd management, lost-and-found, medical response) consume profiles through this API
+    with scoped partner keys.
+servers:
+  - url: http://localhost:3000
+    description: Local dev
+security:
+  - partnerKey: []
+components:
+  securitySchemes:
+    partnerKey:
+      type: http
+      scheme: bearer
+      description: Partner API key (sk_...) or admin key. Issue partner keys via POST /v1/partners (admin only).
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+    PublicProfile:
+      type: object
+      properties:
+        volunteer_id: { type: string }
+        name: { type: string }
+        city: { type: string }
+        languages:
+          type: array
+          items:
+            type: object
+            properties:
+              language: { type: string }
+              proficiency: { type: string, enum: [basic, conversational, fluent, native] }
+        skills:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              category: { type: string }
+              certified: { type: boolean }
+        interests: { type: array, items: { type: string } }
+        availability:
+          type: object
+          properties:
+            dates: { type: array, items: { type: string } }
+            time_slots: { type: array, items: { type: string } }
+            locations: { type: array, items: { type: string } }
+        score_total: { type: integer }
+        skill_scores: { type: object, additionalProperties: { type: number } }
+        verification:
+          type: object
+          properties:
+            kyc_verified: { type: boolean }
+            police_verification_status: { type: string, enum: [pending, clear, flagged] }
+paths:
+  /health:
+    get:
+      summary: Service health
+      security: []
+      responses:
+        "200": { description: OK }
+  /v1/meta/{resource}:
+    get:
+      summary: Reference lists (locations | languages | skills)
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: resource, in: path, required: true, schema: { type: string, enum: [locations, languages, skills] } }
+      responses:
+        "200": { description: Reference data }
+        "404": { description: Unknown resource, content: { application/json: { schema: { $ref: '#/components/schemas/Error' } } } }
+  /v1/partners:
+    post:
+      summary: Issue a partner API key (admin only)
+      security:
+        - partnerKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                scopes:
+                  type: array
+                  items: { type: string, enum: [read:public, read:profiles, search:volunteers, write:score-events] }
+      responses:
+        "201": { description: Key created (shown once) }
+        "401": { description: Admin key required }
+    get:
+      summary: List partners (admin only)
+      security:
+        - partnerKey: []
+      responses:
+        "200": { description: Partner list with masked keys }
+  /v1/volunteers:
+    get:
+      summary: Filtered search/pagination of completed volunteers
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: skill, in: query, schema: { type: string } }
+        - { name: language, in: query, schema: { type: string } }
+        - { name: location, in: query, schema: { type: string } }
+        - { name: min_score, in: query, schema: { type: number } }
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: page_size, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+      responses:
+        "200": { description: Paginated volunteers }
+        "401": { description: Unauthorized }
+    post:
+      summary: Register a volunteer (admin)
+      security:
+        - partnerKey: []
+      responses:
+        "201": { description: Created }
+        "422": { description: Validation error }
+  /v1/volunteers/{id}:
+    get:
+      summary: Volunteer profile (?full=true requires read:profiles)
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: full, in: query, schema: { type: boolean } }
+      responses:
+        "200": { description: Profile }
+        "404": { description: Not found }
+    patch:
+      summary: Edit volunteer fields (admin; score fields immutable)
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Updated }
+        "422": { description: Attempted to patch immutable field }
+  /v1/volunteers/{id}/similar:
+    get:
+      summary: Embedding-similar volunteers
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+        - { name: top_k, in: query, schema: { type: integer, default: 5 } }
+      responses:
+        "200": { description: Ranked similar volunteers }
+  /v1/volunteers/{id}/score-events:
+    get:
+      summary: Score ledger for a volunteer
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Ledger }
+    post:
+      summary: Record a score event (write:score-events)
+      security:
+        - partnerKey: []
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [skill]
+              properties:
+                skill: { type: string }
+                category: { type: string }
+                reason: { type: string, default: volunteering_session }
+                points: { type: number, description: required for non-session events }
+      responses:
+        "201": { description: Event recorded, new totals returned }
+  /v1/volunteers/search:
+    post:
+      summary: Semantic search (hybrid: embedding similarity + filters + score boost)
+      security:
+        - partnerKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query: { type: string }
+                top_k: { type: integer, default: 10 }
+                filters:
+                  type: object
+                  properties:
+                    skill: { type: string }
+                    language: { type: string }
+                    location: { type: string }
+                    min_score: { type: number }
+      responses:
+        "200": { description: Ranked results with match explanations }
+  /api/onboarding:
+    post:
+      summary: Onboarding step 1 — create session (basic info)
+      security: []
+      responses:
+        "201": { description: volunteer_id issued }
+        "422": { description: Validation error }
+    get:
+      summary: Resume onboarding state
+      security: []
+      parameters:
+        - { name: volunteer_id, in: query, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Session state }
+  /api/onboarding/identity:
+    post:
+      summary: Onboarding steps 2-3 — demo KYC/Aadhaar + police verification placeholder
+      security: []
+      responses:
+        "200": { description: Verified (demo) }
+  /api/onboarding/story:
+    post:
+      summary: Onboarding step 4 — voice/video story → STT (Sarvam Saaras v3) → extraction (Sarvam-105B → Gemini fallback) → embedding
+      security: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                volunteer_id: { type: string }
+                media: { type: string, format: binary }
+                transcript: { type: string, description: text fallback (demo) }
+      responses:
+        "200": { description: Extracted profile }
+        "502": { description: STT failure }
+  /api/onboarding/documents:
+    post:
+      summary: Onboarding step 5 — upload certificates (demo classification)
+      security: []
+      responses:
+        "200": { description: Documents stored }
+  /api/onboarding/details:
+    post:
+      summary: Onboarding step 7 — availability, locations, interests
+      security: []
+      responses:
+        "200": { description: Saved; status complete }
+  /api/onboarding/complete:
+    post:
+      summary: Onboarding step 8 — finalize, get ID-card payload
+      security: []
+      responses:
+        "200": { description: Welcome payload }

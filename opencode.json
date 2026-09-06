@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "top-tools": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Top-custom-Tools-AI",
+      "options": {
+        "baseURL": "https://top-tools-ai.com/api/v1"
+      },
+      "models": {
+        "GLM-5.2": {
+          "name": "GLM-5.2"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# next.js build output
+.next/
+out/
+
+# secrets — never commit
+.env
+.env.local
+.env.*.local
+*.pem
+
+# runtime data (volunteer CSV, embeddings, partner keys) — reseed with `npm run seed`
+data/
+data-test/
+
+# user uploads (videos, audio, certificates)
+uploads/
+
+# logs & OS junk
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# misc build artifacts
+*.tsbuildinfo
+.idea/
