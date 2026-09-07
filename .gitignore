@@ -28,6 +28,11 @@ Thumbs.db
 .vscode/
 .idea/
 
+# opencode local config (may contain provider endpoints/keys)
+opencode.json
+opencode.jsonc
+.opencode/
+.opencode*
+
 # misc build artifacts
 *.tsbuildinfo
-.idea/

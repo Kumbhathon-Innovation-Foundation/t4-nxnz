@@ -55,10 +55,27 @@ volunteers is the market.**
 npm install
 npm run seed                 # 5 base demo volunteers + demo partner key
 npx tsx scripts/seed-dispatch.ts   # 32 network volunteers + 12 real-location incidents
-npm run dev                  # http://localhost:3000
+npm run dev                  # https://localhost:3000 (self-signed cert, auto-generated)
 ```
 
-Open **http://localhost:3000** on your phone (mobile-first UI) and complete onboarding.
+Open **https://localhost:3000** on your phone (mobile-first UI) and complete onboarding.
+
+> **⚠️ HTTPS required — mic/camera only work on secure origins.** Browsers block
+> microphone and camera access on plain `http://` except `http://localhost`. We run
+> the app on HTTPS so recording works everywhere:
+>
+> - **Laptop (this device):** `npm run dev` uses Next.js `--experimental-https` and
+>   auto-generates a self-signed cert. Open `https://localhost:3000`, accept the
+>   browser's "self-signed certificate" warning once (Advanced → Proceed), done.
+> - **Phone (same Wi-Fi):** run `npm run dev` (HTTPS) and open
+>   `https://<your-lan-ip>:3000` on the phone — accept the cert warning, then the
+>   mic/camera permission prompts will appear.
+> - **Production (`npm run start`):** put the server behind any TLS terminator
+>   (Caddy, nginx, or a tunnel like `cloudflared`/ngrok) — the app itself is
+>   origin-agnostic, it just needs to be served over `https://`.
+>
+> If the page still says access denied, click the 🔒 icon in the address bar →
+> allow Microphone/Camera → reload.
 
 **Demo OTP:** `123456` · **Demo Aadhaar:** any 12 digits (only last 4 stored) ·
 **Demo partner key:** `sk_demo_dispatch_key_2027` · **Admin key:** `sevasetu-admin-key`

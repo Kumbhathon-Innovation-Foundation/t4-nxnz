@@ -3,7 +3,7 @@
 **Team NXNZ · Tower 4 · Kumbhathon SPRINT**
 
 - 🎥 **Video walkthrough:** <!-- paste your 2-3 min video link here before deadline --> _TODO: add link_
-- 🌐 **Live demo (local):** `npm run start` → http://localhost:3000
+- 🌐 **Live demo (local):** `npm run start` → **https://localhost:3000** (HTTPS required — mic/camera only work on secure origins; see README "HTTPS required")
 
 ## The 30-second pitch
 
@@ -20,7 +20,7 @@
 ## Demo script (3 minutes, on a phone + laptop side by side)
 
 ### 1. Onboarding is a conversation, not a form (60s) — phone
-1. Open `http://localhost:3000` → switch language to **मराठी** and back.
+1. Open **https://localhost:3000** (accept the self-signed cert warning once) → switch language to **मराठी** and back.
 2. Sign up (name, DOB, phone) → OTP **123456**.
 3. Aadhaar: type any 12 digits → "Verifying…" → police check clears (demo placeholders —
    production slots in DigiLocker/UIDAI + state police APIs).
